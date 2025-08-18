@@ -6,23 +6,18 @@ import 'package:get/get.dart';
 class AuthViewModel extends GetxController {
   final _repository = getIt<AuthRepository>();
 
-  // Form
   final formKey = GlobalKey<FormState>();
-
-  // Controllers
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
   final usernameController = TextEditingController();
   final avatarUrlController = TextEditingController();
 
-  // Estados
   final _obscurePassword = true.obs;
   final _isSubmitting = false.obs;
   final _isLoginMode = true.obs;
   final _errorMessage = ''.obs;
 
-  // Getters
   bool get obscurePassword => _obscurePassword.value;
   bool get isSubmitting => _isSubmitting.value;
   bool get isLoginMode => _isLoginMode.value;
@@ -97,12 +92,23 @@ class AuthViewModel extends GetxController {
       print(errorMessage);
     }, (right) {
       print(right);
-      return;
     });
   }
 
   Future<void> register() async {
-    // TODO: lógica para registro
+    final response = await _repository.signUp(
+      email: emailController.text,
+      password: passwordController.text,
+      username: usernameController.text,
+      avatarUrl: avatarUrlController.text,
+    );
+
+    response.fold((left) {
+      _errorMessage.value = left.message;
+      print(errorMessage);
+    }, (right) {
+      print(right);
+    });
   }
 
   @override
@@ -120,9 +126,6 @@ class AuthViewModel extends GetxController {
     _isSubmitting.value = false;
     _clearFields();
     _obscurePassword.value = true;
-
-    // * update
-    // Necessário para atualizar a UI
     update();
   }
 
