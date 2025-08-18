@@ -17,17 +17,17 @@ class AuthViewModel extends GetxController {
   final _isSubmitting = false.obs;
   final _isLoginMode = true.obs;
   final _errorMessage = ''.obs;
+  final _isSuccess = false.obs;
 
   bool get obscurePassword => _obscurePassword.value;
   bool get isSubmitting => _isSubmitting.value;
   bool get isLoginMode => _isLoginMode.value;
   String get errorMessage => _errorMessage.value;
+  bool get isSuccess => _isSuccess.value;
 
   String? validateEmail(String? value) {
     if (value == null || value.isEmpty) return 'Informe o e-mail';
-    if (!RegExp(
-      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$',
-    ).hasMatch(value)) {
+    if (!RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$').hasMatch(value)) {
       return 'E-mail inválido';
     }
     return null;
@@ -59,16 +59,13 @@ class AuthViewModel extends GetxController {
 
   String? validateAvatarUrl(String? value) {
     if (value == null || value.isEmpty) return 'Informe a URL do avatar';
-    if (!RegExp(
-      r'^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/[\w- ./?%&=]*)?$',
-    ).hasMatch(value)) {
+    if (!RegExp(r'^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/[\w- ./?%&=]*)?$').hasMatch(value)) {
       return 'URL inválida';
     }
     return null;
   }
 
-  void toggleObscurePassword() =>
-      _obscurePassword.value = !_obscurePassword.value;
+  void toggleObscurePassword() => _obscurePassword.value = !_obscurePassword.value;
 
   Future<void> submit() async {
     final valid = formKey.currentState?.validate() ?? false;
@@ -89,9 +86,10 @@ class AuthViewModel extends GetxController {
     );
     response.fold((left) {
       _errorMessage.value = left.message;
-      print(errorMessage);
+      _isSuccess.value = false;
     }, (right) {
-      print(right);
+      _errorMessage.value = '';
+      _isSuccess.value = false;
     });
   }
 
@@ -105,9 +103,13 @@ class AuthViewModel extends GetxController {
 
     response.fold((left) {
       _errorMessage.value = left.message;
-      print(errorMessage);
-    }, (right) {
-      print(right);
+      _isSuccess.value = false;
+    }, (right) async {
+      _errorMessage.value = '';
+      _isSuccess.value = true;
+      await Future.delayed(const Duration(seconds: 2));
+      _isSuccess.value = false;
+      toggleMode();
     });
   }
 
